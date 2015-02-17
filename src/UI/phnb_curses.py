@@ -49,15 +49,6 @@ class phnb_curses:
                 self._panels[window_name][pos] = self._pad.derwin(
                         pos[2], pos[3]-pos[1], pos[0], pos[1])
 
-        # not working "_v" does not exist ...
-        #windows = [ w for p,w in _v.items() for _k,_v in self._panels.items() ]
-        #for w in range(len(windows)):
-            #windows[w].box()
-            #windows[w].addstr(24, 24, 'I AM {0}'.format(list(self._panels.keys())[w]))
-            #cy, cx = windows[w].getbegyx()
-            #maxy, maxx = self._screen.getmaxyx()
-            #self._pad.refresh(cy, cx, 1, maxx//2 - 110, maxy-1, maxx-1)
-
         for key, value in self._panels.items():
             for pos, win in value.items():
                 win.box()
@@ -65,23 +56,6 @@ class phnb_curses:
                 cy, cx = win.getbegyx()
                 maxy, maxx = self._screen.getmaxyx()
                 self._pad.refresh(cy, cx, 1, maxx//2 - 110, maxy-1, maxx-1)
-
-        """ old ver """
-        #windows = []
-        #for k, dic in self._panels.items():
-            #windows.append(self._pad.derwin(v[2], v[3]-v[1], v[0], v[1]))
-        #for k in range(len(windows)):
-            #windows[k].box()
-
-
-            # TODO ONLY FOR TESTING PURPOSE HERE
-            #windows[k].addstr(24, 24, 'I AM {0}'.format(list(self._panels.keys())[k]))
-            #cy, cx = windows[k].getbegyx()
-            #maxy, maxx = self._screen.getmaxyx()
-            #self._pad.refresh(cy, cx, 1, maxx//2 - 110, maxy-1, maxx-1)
-
-
-        #return windows
 
     def _csr_next_line(self, panel_name):
         """ returns a tuple on next position to write to """
