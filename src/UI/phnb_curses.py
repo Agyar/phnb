@@ -54,9 +54,18 @@ class phnb_curses:
             for pos, win in value.items():
                 win.box()
                 win.addstr(24, 24, 'I AM {0}'.format(key))
-                cy, cx = win.getbegyx()
-                maxy, maxx = self._screen.getmaxyx()
-                self._pad.refresh(cy, cx, 1, maxx//2 - 110, maxy-1, maxx-1)
+        self._refresh_all()
+
+    def _refresh_all(self):
+        for key, value in self._panels.items():
+            for pos, win in value.items():
+                self._refresh(win)
+    
+    def _refresh(self, win):
+        cy, cx = win.getbegyx()
+        maxy, maxx = self._screen.getmaxyx()
+        self._pad.refresh(cy, cx, 1, maxx//2 - 110, maxy-1, maxx-1)
+
 
     def _csr_next_line(self):
         """ returns a tuple on next position to write to """
@@ -69,7 +78,7 @@ class phnb_curses:
         curr[0].bkgd(curses.color_pair(2))
         naixt[0].bkgd(curses.color_pair(1))
         self._active_panel = panel_name
-        self._make_textboxes()
+        self._refresh_all()
 
 class phnb_event:
 

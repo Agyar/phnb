@@ -36,5 +36,12 @@ while (True):
             phnb_curses.switch_focus('_c_two')
         elif phnb_curses._active_panel == '_c_two':
             phnb_curses.switch_focus('_main')
+    elif k == phnb_event.KEY_STAB:
+        if phnb_curses._active_panel == '_main':
+            phnb_curses.switch_focus('_c_two')
+        elif phnb_curses._active_panel == '_c_one':
+            phnb_curses.switch_focus('_main')
+        elif phnb_curses._active_panel == '_c_two':
+            phnb_curses.switch_focus('_c_one')
 
 
