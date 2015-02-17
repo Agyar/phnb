@@ -7,6 +7,7 @@ class phnb_curses:
 
     _screen = None
     _pad = None
+    _cx, _cy = 0, 0
     _active_panel =  '_main'
     _panels = {
         # TODO determine them by computation
@@ -57,17 +58,18 @@ class phnb_curses:
                 maxy, maxx = self._screen.getmaxyx()
                 self._pad.refresh(cy, cx, 1, maxx//2 - 110, maxy-1, maxx-1)
 
-    def _csr_next_line(self, panel_name):
+    def _csr_next_line(self):
         """ returns a tuple on next position to write to """
         pass
 
-    def switch_focus(self):
+    def switch_focus(self, panel_name):
         """ hilight active window """
-        #self._panels['active'].
-
-
-        pass
-        
+        curr = [ w for p,w in self._panels[self._active_panel].items() ]
+        naixt = [ w for p,w in self._panels[panel_name].items() ]
+        curr[0].bkgd(curses.color_pair(2))
+        naixt[0].bkgd(curses.color_pair(1))
+        self._active_panel = panel_name
+        self._make_textboxes()
 
 class phnb_event:
 
