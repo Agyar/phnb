@@ -49,7 +49,6 @@ class phnb_curses:
         self._screen.refresh()
     
     def end_ui(self):
-        #curses.nocbreak()
         curses.noraw()
         self._screen.keypad(0)
         curses.echo()
@@ -74,20 +73,13 @@ class phnb_curses:
     def _refresh_all(self):
         self._pad.refresh(1, 0, 0, 0, 
                 self.SCR_HEIGHT-1, self.SCR_WIDTH-1)
-        #for key, value in self._panels.items():
-            #for pos, win in value.items():
-                #self._refresh(win)
     
     def _refresh(self, win):
         cy, cx = win.getbegyx()
         maxy, maxx = self._screen.getmaxyx()
-        """ refered as TEXTBOX_WIDTH//2 on sample
-            should be similar as sthg like ymax - ymin """
-        # TODO pimp by _pad sizes or call only once ...
+        # TODO pimp by _pad sizes .  . <- here
         self._pad.refresh(cy, cx, 0, 0, 
                 self.SCR_HEIGHT-1, self.SCR_WIDTH-1)
-        #win.noutrefresh()
-        #curses.doupdate()
 
     def _csr_next_line(self):
         """ returns a tuple on next position to write to """
@@ -154,4 +146,3 @@ class phnb_curses_keys_handler:
         _isdb = self._event_db.get(_key)
         if _isdb:
             return _isdb
-
