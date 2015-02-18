@@ -2,21 +2,24 @@ import curses
 
 class phnb_curses:
 
-    PAD_HEIGHT = 0
-    PAD_WIDTH = 0
+    """ Note: in curses, width is y, height is x """
+    PAD_HEIGHT           = None # (pixels)
+    PAD_WIDTH            = None # (pixels)
+    SCR_HEIGHT           = None # (term col or row)
+    SCR_WIDTH            = None # (term col or row)
+    MIN_SIZE_CVIEW       = 212  # (term col or row)
+    _C_WIDTH             = 80   # (term col or row)
+    _C_HEIGHT            = 54   # (term col or row)
+    _M_WIDTH             = 50   # (term col or row)
 
-    _screen = None
-    _pad = None
-    _cx, _cy = 0, 0
-    _active_panel =  '_main'
-    _panels = {
-        # TODO determine them by computation
-        '_main'  : {( 1,   0, 52, 46  )    :None},
-        '_c_one' : {( 1,  48, 52, 128 )    :None},
-        '_c_two' : {( 1, 130, 52, 210 )    :None}
-    }
+    _screen              = None
+    _pad                 = None
+    _mode                = 'extended'
+    _cursor_x, _cursor_y = 0, 0
+    _active_panel        = None
+    _panels              = {}
 
-    def __init__(self, h=1080, w=1920):
+    def __init__(self, w=1920, h=1080):
         self.PAD_HEIGHT = h
         self.PAD_WIDTH = w
         self.init_ui()
@@ -24,17 +27,30 @@ class phnb_curses:
     def init_ui(self):
         self._screen = curses.initscr()
         curses.noecho()
-        curses.cbreak()
+        curses.raw()
         curses.curs_set(0)
         self._screen.keypad(1)
+
+        self.SCR_HEIGHT, self.SCR_WIDTH = self._screen.getmaxyx()
+        if self.SCR_WIDTH < self.MIN_SIZE_CVIEW :
+            self._mode = 'vanilla'
+        else:
+            self._active_panel    =  '_main'
+            self._panels = {
+                    # win name : {( start x, start y, end x, end y) : win obj}
+                    '_main'  : {( 1,   0, self.SCR_HEIGHT, 50  )    :None},
+                    '_c_one' : {( 1,  51, self.SCR_HEIGHT, 131 )    :None},
+                    '_c_two' : {( 1, 132, self.SCR_HEIGHT, 212 )    :None}
+            }
+
         curses.start_color()
         curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_WHITE)
         curses.init_pair(2, curses.COLOR_WHITE, curses.COLOR_BLACK)
-        self._screen.bkgd(curses.color_pair(2))
         self._screen.refresh()
     
     def end_ui(self):
-        curses.nocbreak()
+        #curses.nocbreak()
+        curses.noraw()
         self._screen.keypad(0)
         curses.echo()
         curses.endwin()
@@ -44,7 +60,6 @@ class phnb_curses:
         self._pad.box()
 
     def _make_textboxes(self):
-
         for window_name, attrs in self._panels.items():
             for pos, win in attrs.items():
                 self._panels[window_name][pos] = self._pad.derwin(
@@ -53,19 +68,26 @@ class phnb_curses:
         for key, value in self._panels.items():
             for pos, win in value.items():
                 win.box()
-                win.addstr(24, 24, 'I AM {0}'.format(key))
+                #win.addstr(24, 24, 'I AM {0}'.format(key))
         self._refresh_all()
 
     def _refresh_all(self):
-        for key, value in self._panels.items():
-            for pos, win in value.items():
-                self._refresh(win)
+        self._pad.refresh(1, 0, 0, 0, 
+                self.SCR_HEIGHT-1, self.SCR_WIDTH-1)
+        #for key, value in self._panels.items():
+            #for pos, win in value.items():
+                #self._refresh(win)
     
     def _refresh(self, win):
         cy, cx = win.getbegyx()
         maxy, maxx = self._screen.getmaxyx()
-        self._pad.refresh(cy, cx, 1, maxx//2 - 110, maxy-1, maxx-1)
-
+        """ refered as TEXTBOX_WIDTH//2 on sample
+            should be similar as sthg like ymax - ymin """
+        # TODO pimp by _pad sizes or call only once ...
+        self._pad.refresh(cy, cx, 0, 0, 
+                self.SCR_HEIGHT-1, self.SCR_WIDTH-1)
+        #win.noutrefresh()
+        #curses.doupdate()
 
     def _csr_next_line(self):
         """ returns a tuple on next position to write to """
@@ -97,6 +119,8 @@ class phnb_event:
     KEY_TAB      = 42 << 12
     KEY_STAB     = 42 << 13
     KEY_REDO     = 42 << 14
+    KEY_SAVE     = 42 << 15
+    KEY_RESIZE   = 42 << 16
 
 class phnb_curses_keys_handler:
 
@@ -109,14 +133,15 @@ class phnb_curses_keys_handler:
         curses.KEY_DL       : phnb_event.KEY_DEL,
         curses.KEY_CLEAR    : phnb_event.KEY_CLEAR,
         curses.KEY_ENTER    : phnb_event.KEY_ENTER,
-        #TODO replace this with ^q 
-        ord('q')            : phnb_event.KEY_EXIT,
+        17                  : phnb_event.KEY_EXIT,
         9                   : phnb_event.KEY_TAB,
         353                 : phnb_event.KEY_STAB,
         24                  : phnb_event.KEY_CUT,
         22                  : phnb_event.KEY_PASTE,
         23                  : phnb_event.KEY_COPY,
         18                  : phnb_event.KEY_REDO,
+        19                  : phnb_event.KEY_SAVE,
+        curses.KEY_RESIZE   : phnb_event.KEY_RESIZE,
     }
 
     _screen = None

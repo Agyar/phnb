@@ -43,5 +43,6 @@ while (True):
             phnb_curses.switch_focus('_main')
         elif phnb_curses._active_panel == '_c_two':
             phnb_curses.switch_focus('_c_one')
-
-
+    elif k == phnb_event.KEY_RESIZE:
+        # TODO
+        break
