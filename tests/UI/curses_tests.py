@@ -74,6 +74,41 @@ while (True):
         phnb.collapse()
         phnb.draw_phnb()
 
+    elif k == phnb_event.KEY_SWITCH_DONE:
+        phnb.switch_done()
+        phnb.draw_phnb()
+
+    elif k == phnb_event.KEY_SWITCH_TYPE:
+        phnb.switch_type()
+        phnb.draw_phnb()
+
+    elif k == phnb_event.KEY_UPGRADE:
+        phnb.upgrade_nodes()
+        phnb.draw_phnb()
+
+    elif k == phnb_event.KEY_DOWNGRADE:
+        phnb.upgrade_nodes()
+        phnb.draw_phnb()
+
+    elif k == phnb_event.KEY_HIDE:
+        phnb.switch_hide()
+        phnb.draw_phnb()
+
+    elif k == phnb_event.KEY_DEL:
+        phnb.delete_node()
+        phnb.draw_phnb()
+
+    elif k == phnb_event.KEY_COPY:
+        phnb.copy_node()
+
+    elif k == phnb_event.KEY_CUT:
+        phnb.cut_node()
+        phnb.draw_phnb()
+
+    elif k == phnb_event.KEY_PASTE:
+        phnb.paste_node()
+        phnb.draw_phnb()
+
     elif k == phnb_event.KEY_CLEAR:
         phnb.draw_phnb()
 

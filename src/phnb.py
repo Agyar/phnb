@@ -4,6 +4,7 @@ from UI.phnb_curses import phnb_curses, phnb_event, phnb_curses_keys_handler
 from DB.phnb_db_handler import xml_handler
 
 # TODO not nice
+import itertools
 import curses
 
 class phnb:
@@ -13,15 +14,21 @@ class phnb:
         self.ui   = ui
         self._csr = 0
         self._dl  = None
+        self._register = None
         self._modified = True
+        self.hide_done = False
 
-    def draw_phnb(self):
+    def update_db(self):
         if self._modified:
             dl = []
             gen = ( n for n in self.db._data )
             self._build_display_list(dl, gen)
+            self.build_parents()
             self._dl = self._decorate_display_list(dl)
             self._modified = False
+
+    def draw_phnb(self):
+        self.update_db()
 
         self.ui.redraw()
 
@@ -42,7 +49,7 @@ class phnb:
                     self.ui.draw_line(80, o_y, x, _p+text, _s, self.ui._active_panel)
                 o_y += 1
         self.ui._refresh_all()
-    
+
     def expand(self):
         l, m, _, _, t = self._dl[self._csr]
         i = self.db.index((l,m,t))
@@ -60,6 +67,31 @@ class phnb:
         self.db._data[i] = (l, meta, t)
         self._modified = True
 
+    def copy_node(self):
+        l, m, _, _, t = self._dl[self._csr]
+        i = self.db.index((l,m,t))
+        self._register = self.db._data[i]
+        return i
+
+    def delete_node(self):
+        i = self.copy_node()
+        self.db._data.pop(i)
+        self._modified = True
+
+    def cut_node(self):
+        i = self.copy_node()
+        self.db._data.pop(i)
+        self._modified = True
+
+    def paste_node(self):
+        l, m, _, _, t = self._dl[self._csr]
+        i = self.db.index((l, m, t))
+        if self._register:
+            _, _m, _t = self._register
+            self.db._data.insert(i+1, (l, _m, _t))
+            self._csr+=1
+        self._modified = True
+
     def make_todo(self):
         l, m, _, _, t = self._dl[self._csr]
         i = self.db.index((l,m,t))
@@ -67,6 +99,7 @@ class phnb:
         meta['type'] = 'todo'
         meta['done'] = 'no'
         self.db._data[i] = (l, meta, t)
+        self._modified = True
 
     def make_node(self):
         l, m, _, _, t = self._dl[self._csr]
@@ -76,6 +109,7 @@ class phnb:
             meta.pop('type')
             meta.pop('done')
         self.db._data[i] = (l, meta, t)
+        self._modified = True
 
     def tick_done(self):
         l, m, _, _, t = self._dl[self._csr]
@@ -83,6 +117,7 @@ class phnb:
         meta = m.copy()
         meta['done'] = 'yes'
         self.db._data[i] = (l, meta, t)
+        self._modified = True
 
     def untick_done(self):
         l, m, _, _, t = self._dl[self._csr]
@@ -90,6 +125,37 @@ class phnb:
         meta = m.copy()
         meta['done'] = 'no'
         self.db._data[i] = (l, meta, t)
+        self._modified = True
+
+    def switch_done(self):
+        _, m, _, _, _ = self._dl[self._csr]
+        if m.get('done') == 'yes':
+            self.untick_done()
+        elif m.get('done') == 'no':
+            self.tick_done()
+        else:
+            self.make_todo()
+            self.update_db()
+            self.tick_done()
+
+    def switch_type(self):
+        _, m, _, _, _ = self._dl[self._csr]
+        if m.get('type'):
+            self.make_node()
+        else:
+            self.make_todo()
+
+    def upgrade_nodes(self):
+        l, m, _, _, t = self._dl[self._csr]
+        i = self.db.index((l,m,t))
+        # TODO not working, this will erase the part of the list that do not 
+        #      answer the condition l > _l
+        list_update = ((_l+1, _m, _t) for _l, _m, _t in self.db._data[i:])
+        self.db._data[i:] = list(itertools.takewhile(lambda x: x[0] < l, list_update))
+        self._modified = True
+
+    def downgrade_nodes(self):
+        pass
 
     def _move_csr_up(self):
         if self._csr > 0:
@@ -113,20 +179,28 @@ class phnb:
 
     def _decorate_display_list(self, dl):
         _dl = []
+        l, m, t = dl[self._csr]
         for level, meta, text in dl:
-            style = curses.A_NORMAL
+            if (l,m,t) == (level, meta, text):
+                # FIX THIS
+                # TODO CAUTION this can also work for duplicated nodes
+                style = curses.A_REVERSE
+            else:
+                style = curses.A_NORMAL
             if meta.get('type') == 'todo':
-                # TODO adapt this
-                #style = curses.A_BOLD
                 if meta.get('done') == 'yes':
                     prefix = '[X] '
                 else:
                     # TODO add computation of % completed mode
                     prefix = '[ ] '
-            elif meta.get('expanded'):
+            elif meta.get('expanded') and (level, meta, text) in self._parents_list:
                 prefix = '- '
-            else:
+                style = curses.A_BOLD
+            elif (level, meta, text) in self._parents_list:
                 prefix = '+ '
+                style = curses.A_BOLD
+            else:
+                prefix = '- '
             prefix = (level-2)*'    '+prefix
             _dl.append((level, meta, prefix, style, text))
         return _dl
@@ -134,6 +208,25 @@ class phnb:
     def _build_display_list(self, display_list, generator, level=1, expanded=False ):
         for _l, _m, _t in generator:
             if _l <= level:
-                display_list.append((_l, _m, _t))
+                if (_m.get('done') == 'yes' and not self.hide_done) or _m.get('done') == 'no' or not _m.get('done'):
+                    display_list.append((_l, _m, _t))
                 if _m.get('expanded'):
                     self._build_display_list(display_list, generator, level+1, True)
+
+    def switch_hide(self):
+        if self.hide_done:
+            self.hide_done = False
+        else:
+            self.hide_done = True
+        self._modified = True
+
+    def build_parents(self):
+        hc = []
+        _l, _m, _t = 0, None, None
+        for l, m, t in self.db._data:
+            if l > _l:
+                hc.append((_l, _m, _t))
+            _l, _m, _t = l, m, t
+        self._parents_list = hc
+
+

@@ -3,28 +3,15 @@ import curses
 class phnb_curses:
 
     """ Note: in curses, width is y, height is x """
-    # TODO clean this
-    PAD_HEIGHT           = None # (pixels)
-    PAD_WIDTH            = None # (pixels)
-    SCR_HEIGHT           = None # (term col or row)
-    SCR_WIDTH            = None # (term col or row)
-    MIN_SIZE_CVIEW       = 212  # (term col or row)
-    _C_WIDTH             = 80   # (term col or row)
-    _C_HEIGHT            = 54   # (term col or row)
-    _M_WIDTH             = 50   # (term col or row)
-
-    _screen              = None
-    _pad                 = None
-    _mode                = 'extended'
-    _cursor_x, _cursor_y = 0, 0
-    _active_panel        = None
-    _active_color        = None
-    _inactive_color      = None
-    _panels              = {}
-
     def __init__(self, w=1920, h=1080):
         self.PAD_HEIGHT = h
         self.PAD_WIDTH = w
+        self._mode      = 'extended'
+        self._panels = {}
+        self.MIN_SIZE_CVIEW = 212
+        self._C_WIDTH = 80
+        self._C_HEIGHT = 54
+        self._M_WIDTH = 50
         self.init_ui()
 
     def init_ui(self):
@@ -135,22 +122,28 @@ class phnb_curses:
 class phnb_event:
 
     """ Constant table for phnb events. """
-    KEY_UP       = 42 << 1
-    KEY_DOWN     = 42 << 2
-    KEY_RIGHT    = 42 << 3
-    KEY_LEFT     = 42 << 4
-    KEY_DEL      = 42 << 5
-    KEY_CLEAR    = 42 << 6
-    KEY_ENTER    = 42 << 7
-    KEY_COPY     = 42 << 8
-    KEY_PASTE    = 42 << 9
-    KEY_CUT      = 42 << 10
-    KEY_EXIT     = 42 << 11
-    KEY_TAB      = 42 << 12
-    KEY_STAB     = 42 << 13
-    KEY_REDO     = 42 << 14
-    KEY_SAVE     = 42 << 15
-    KEY_RESIZE   = 42 << 16
+    KEY_UP            = 42 << 1
+    KEY_DOWN          = 42 << 2
+    KEY_RIGHT         = 42 << 3
+    KEY_LEFT          = 42 << 4
+    KEY_DEL           = 42 << 5
+    KEY_CLEAR         = 42 << 6
+    KEY_ENTER         = 42 << 7
+    KEY_COPY          = 42 << 8
+    KEY_PASTE         = 42 << 9
+    KEY_CUT           = 42 << 10
+    KEY_EXIT          = 42 << 11
+    KEY_TAB           = 42 << 12
+    KEY_STAB          = 42 << 13
+    KEY_REDO          = 42 << 14
+    KEY_SAVE          = 42 << 15
+    KEY_RESIZE        = 42 << 16
+    KEY_SWITCH_TYPE   = 42 << 17
+    KEY_SWITCH_DONE   = 42 << 18
+    KEY_UPGRADE       = 42 << 19
+    KEY_DOWNGRADE     = 42 << 20
+    KEY_SWITCH        = 42 << 21
+    KEY_HIDE          = 42 << 22
 
 class phnb_curses_keys_handler:
 
@@ -160,7 +153,7 @@ class phnb_curses_keys_handler:
         curses.KEY_DOWN     : phnb_event.KEY_DOWN,
         curses.KEY_RIGHT    : phnb_event.KEY_RIGHT,
         curses.KEY_LEFT     : phnb_event.KEY_LEFT,
-        curses.KEY_DL       : phnb_event.KEY_DEL,
+        330                 : phnb_event.KEY_DEL,
         curses.KEY_CLEAR    : phnb_event.KEY_CLEAR,
         curses.KEY_ENTER    : phnb_event.KEY_ENTER,
         17                  : phnb_event.KEY_EXIT,
@@ -168,10 +161,16 @@ class phnb_curses_keys_handler:
         353                 : phnb_event.KEY_STAB,
         24                  : phnb_event.KEY_CUT,
         22                  : phnb_event.KEY_PASTE,
-        23                  : phnb_event.KEY_COPY,
+        3                  : phnb_event.KEY_COPY,
         18                  : phnb_event.KEY_REDO,
         19                  : phnb_event.KEY_SAVE,
         curses.KEY_RESIZE   : phnb_event.KEY_RESIZE,
+        20                  : phnb_event.KEY_SWITCH_TYPE,
+        4                   : phnb_event.KEY_SWITCH_DONE,
+        62                  : phnb_event.KEY_UPGRADE,
+        60                  : phnb_event.KEY_DOWNGRADE,
+        15                  : phnb_event.KEY_SWITCH,
+        127                 : phnb_event.KEY_HIDE,
     }
 
     def __init__(self, phnb_curses):
