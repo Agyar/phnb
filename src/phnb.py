@@ -39,15 +39,17 @@ class phnb:
             elif level == 1:
                 token = False
             if level == 1:
-                self.ui.draw_line(80, m_y, x, _p+text, _s, '_main')
+                self.ui.draw_line(80-x, m_y, x, _p+text, _s, '_main')
                 m_y += 1
             elif token:
-                #self.ui.draw_line(80, o_y, x, _p+text, _s, '_c_one')
+                self.ui.draw_line(80-x, o_y, x, _p+text, _s, '_c_one')
                 if self.ui._active_panel == '_main':
-                    self.ui.draw_line(80, o_y, x, _p+text, _s, '_c_one')
+                    self.ui.draw_line(80-x, o_y, x, _p+text, _s, '_c_one')
                 else:
-                    self.ui.draw_line(80, o_y, x, _p+text, _s, self.ui._active_panel)
+                    self.ui.draw_line(80-x, o_y, x, _p+text, _s, self.ui._active_panel)
                 o_y += 1
+                if o_y > 64:
+                    return 
         self.ui._refresh_all()
 
     def expand(self):

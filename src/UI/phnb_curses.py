@@ -79,7 +79,7 @@ class phnb_curses:
             for pos, win in value.items():
                 win.box()
                 win.bkgd(self._inactive_color)
-                #win.addstr(24, 24, 'I AM {0}'.format(key))
+                # win.addstr(24, 24, 'I AM {0}'.format(key))
         self._get_win().bkgd(self._active_color)
         self._refresh_all()
 
