@@ -5,10 +5,11 @@ sys.path.insert(0, "../../src")
 from DB.phnb_db_handler import xml_handler
 
 xml_handler = xml_handler("/home/ben/.hnb")
-xml_handler.load_db()
-xml_handler.fill_in()
+#useless now, init call these from the start
+# xml_handler.load_db()
+# xml_handler.fill_in()
 
-xml_handler.export("test.xml")
+# xml_handler.export("test.xml")
 
 """ display all informations we have """
 #for level, meta, text in xml_handler:
