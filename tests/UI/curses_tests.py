@@ -1,37 +1,16 @@
 import sys
 sys.path.insert(0, "../../src")
 from UI.phnb_curses import *
-from DB.phnb_db_handler import xml_handler
-from phnb import phnb
 
-phnb_db = xml_handler("/home/ben/.hnb")
-#phnb_db.load_db()
-#phnb_db.fill_in()
+from phnb import phnb
 
 phnb_ui = phnb_curses()
 phnb_ui.init_ui()
 
 key_handler = phnb_curses_keys_handler(phnb_ui)
 
-phnb = phnb(phnb_db, phnb_ui)
-
-#while (True):
-""" version 1 """
-    #key = phnb_curses._screen.getch()
-    #if key == ord('q'):
-        #break
-""" version 2 """
-    #if key_handler.get_key() == phnb_event.KEY_EXIT:
-        #break
-
-""" key displayer """
-#key = phnb_curses._screen.getch()
-#phnb_curses.end_ui()
-#print(key)
-
 y, x = 2, 2
 
-phnb.draw_phnb()
 while (True):
     k = key_handler.get_key()
 
@@ -60,60 +39,45 @@ while (True):
 
     elif k == phnb_event.KEY_UP:
         phnb._move_csr_up()
-        phnb.draw_phnb()
 
     elif k == phnb_event.KEY_DOWN:
         phnb._move_csr_down()
-        phnb.draw_phnb()
 
     elif k == phnb_event.KEY_RIGHT:
         phnb.expand()
-        phnb.draw_phnb()
 
     elif k == phnb_event.KEY_LEFT:
         phnb.collapse()
-        phnb.draw_phnb()
 
     elif k == phnb_event.KEY_SWITCH_DONE:
         phnb.switch_done()
-        phnb.draw_phnb()
 
     elif k == phnb_event.KEY_SWITCH_TYPE:
         phnb.switch_type()
-        phnb.draw_phnb()
 
     elif k == phnb_event.KEY_UPGRADE:
         phnb.upgrade_nodes()
-        phnb.draw_phnb()
 
     elif k == phnb_event.KEY_DOWNGRADE:
         phnb.upgrade_nodes()
-        phnb.draw_phnb()
 
     elif k == phnb_event.KEY_HIDE:
         phnb.switch_hide()
-        phnb.draw_phnb()
 
     elif k == phnb_event.KEY_DEL:
         phnb.delete_node()
-        phnb.draw_phnb()
 
     elif k == phnb_event.KEY_COPY:
         phnb.copy_node()
 
     elif k == phnb_event.KEY_CUT:
         phnb.cut_node()
-        phnb.draw_phnb()
 
     elif k == phnb_event.KEY_PASTE:
         phnb.paste_node()
-        phnb.draw_phnb()
 
-    elif k == phnb_event.KEY_CLEAR:
-        phnb.draw_phnb()
+    # elif k == phnb_event.KEY_CLEAR:
 
     elif k:
-        #phnb_ui._screen.addstr(y, x, k, curses.A_REVERSE)
         phnb_ui._screen.addch(y, x, k, curses.A_NORMAL)
-        #phnb_ui._refresh()
         x += 1
