@@ -199,6 +199,18 @@ class phnb:
             # hilight elected item
             self._dl[self._csr] = ( _l, _m, _p, curses.A_REVERSE, _t)
 
+    def find_daddy(self, level):
+        backup = self._csr
+        self._dl.reverse()
+        for l, _, _, _, _ in self._dl[backup:]:
+            if l < level:
+                self._dl.reverse()
+                return
+            self._csr -= 1
+        self._dl.reverse()
+        self._csr = backup
+        return
+
     def find_prev_brotha(self, level):
         backup = self._csr
         self._dl.reverse()
