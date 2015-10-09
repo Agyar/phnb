@@ -53,11 +53,12 @@ class phnb:
         self.ui._refresh_all()
 
     def expand(self):
-        l, m, _, _, t = self._dl[self._csr]
+        l, m, p, _, t = self._dl[self._csr]
         i = self.db.index((l,m,t))
         meta = m.copy()
         meta['expanded'] = 'yes'
         self.db._data[i] = (l, meta, t)
+        self._dl[self._csr] = ( l, meta, p, curses.A_REVERSE, t)
         self._modified = True
 
     def collapse(self):
@@ -160,6 +161,7 @@ class phnb:
         pass
 
     def _move_csr_up(self):
+        """ deprecated """
         if self._csr > 0:
             l, m, p, _, t = self._dl[self._csr]
             self._dl[self._csr] = ( l, m, p, curses.A_NORMAL, t ) 
@@ -168,6 +170,37 @@ class phnb:
             self._csr -= 1
             l, m, p, _, t = self._dl[self._csr]
             self._dl[self._csr] = ( l, m, p, curses.A_REVERSE, t)
+
+    def _move_csr_down_by_lvl(self):
+        if self._csr < len(self._dl):
+            l, m, p, _, t = self._dl[self._csr]
+            self._dl[self._csr] = ( l, m, p, curses.A_NORMAL, t ) 
+
+            # assume next item should be the next following
+            self._csr += 1
+
+            # in any case we should not go farther than the end
+            if self._csr == len(self._dl):
+                self._csr -= 1
+                self._dl[self._csr] = ( l, m, p, curses.A_REVERSE, t ) 
+                return
+
+            # if next _csr is not of same level, then go find it
+            _l, _m, _p, _, _t = self._dl[self._csr]
+            if _l != l:
+                self.find_next_brotha(l)
+                _l, _m, _p, _, _t = self._dl[self._csr]
+
+            # hilight our elected next item
+            self._dl[self._csr] = ( _l, _m, _p, curses.A_REVERSE, _t)
+
+    def find_next_brotha(self, level):
+        for l, _, _, _, _ in self._dl[self._csr:]:
+            self._csr += 1
+            if l == level:
+                return 
+        self._csr = len(self._dl)-1
+        return 
 
     def _move_csr_down(self):
         if self._csr < len(self._dl):

@@ -38,6 +38,16 @@ class phnb_curses:
             self._make_textboxes()
         self._screen.refresh()
 
+    def end_ui(self):
+        curses.noraw()
+        self._screen.keypad(0)
+        curses.echo()
+        curses.endwin()
+
+    def redraw(self):
+        self._pad.erase()
+        self._make_textboxes()
+
     def _define_colors(self):
         curses.start_color()
         curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_WHITE)
@@ -58,12 +68,6 @@ class phnb_curses:
 
         self._active_color = curses.color_pair(1)
         self._inactive_color = curses.color_pair(8)
-    
-    def end_ui(self):
-        curses.noraw()
-        self._screen.keypad(0)
-        curses.echo()
-        curses.endwin()
 
     def _create_pad(self):
         self._pad = curses.newpad(self.PAD_HEIGHT, self.PAD_WIDTH)
@@ -82,10 +86,6 @@ class phnb_curses:
                 # win.addstr(24, 24, 'I AM {0}'.format(key))
         self._get_win().bkgd(self._active_color)
         self._refresh_all()
-
-    def redraw(self):
-        self._pad.erase()
-        self._make_textboxes()
 
     def _get_win(self, win_name=None):
         if win_name is None:
