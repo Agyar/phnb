@@ -29,6 +29,7 @@ while (True):
             phnb_ui.switch_focus('_c_two')
         elif phnb_ui._active_panel == '_c_two':
             phnb_ui.switch_focus('_main')
+        phnb.draw_phnb()
 
     elif k == phnb_event.KEY_STAB:
         if phnb_ui._active_panel == '_main':
@@ -37,6 +38,7 @@ while (True):
             phnb_ui.switch_focus('_main')
         elif phnb_ui._active_panel == '_c_two':
             phnb_ui.switch_focus('_c_one')
+        phnb.draw_phnb()
 
     elif k == phnb_event.KEY_RESIZE:
         # TODO
