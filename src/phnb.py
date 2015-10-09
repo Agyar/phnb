@@ -75,7 +75,7 @@ class phnb:
         self.db._data[i] = (l, meta, t)
         self.update_db()
 
-        self._csr = self._dl.index((l, meta, p, x, t))
+        self._csr = self._dl.index((l, m, p, x, t))
         self._dl[self._csr] = ( l, meta, p, curses.A_REVERSE, t)
         self._modified = True
 
@@ -306,7 +306,7 @@ class phnb:
             if _l <= level:
                 if (_m.get('done') == 'yes' and not self.hide_done) or _m.get('done') == 'no' or not _m.get('done'):
                     display_list.append((_l, _m, _t))
-                if _m.get('expanded'):
+                if _m.get('expanded') == 'yes':
                     self._build_display_list(display_list, generator, level+1, True)
 
     def switch_hide(self):
