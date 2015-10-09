@@ -58,6 +58,7 @@ class phnb:
         meta = m.copy()
         meta['expanded'] = 'yes'
         self.db._data[i] = (l, meta, t)
+        self._csr += 1
         self._dl[self._csr] = ( l, meta, p, curses.A_REVERSE, t)
         self._modified = True
 
