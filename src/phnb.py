@@ -214,7 +214,7 @@ class phnb:
     def find_prev_brotha(self, level):
         backup = self._csr
         self._dl.reverse()
-        for l, _, _, _, _ in self._dl[0:backup]:
+        for l, _, _, _, _ in self._dl[backup:]:
             self._csr -= 1
             if l == level:
                 self._dl.reverse()
