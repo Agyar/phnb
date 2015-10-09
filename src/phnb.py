@@ -171,6 +171,41 @@ class phnb:
             l, m, p, _, t = self._dl[self._csr]
             self._dl[self._csr] = ( l, m, p, curses.A_REVERSE, t)
 
+    def _move_csr_up_by_lvl(self):
+        if self._csr > 0:
+            l, m, p, _, t = self._dl[self._csr]
+            self._dl[self._csr] = ( l, m, p, curses.A_NORMAL, t ) 
+                                                                   
+            # assume prev item should be the prev in the list
+            self._csr -= 1
+
+            # _csr will be at least 0, no need to check
+
+            # if assumption was wrong, go get this soab
+            _l, _m, _p, _, _t = self._dl[self._csr]
+            if _l != l:
+                self.find_prev_brotha(l)
+                _l, _m, _p, _, _t = self._dl[self._csr]
+
+            # hilight elected item
+            self._dl[self._csr] = ( _l, _m, _p, curses.A_REVERSE, _t)
+
+    def find_prev_brotha(self, level):
+        backup = self._csr
+        self._dl.reverse()
+        for l, _, _, _, _ in self._dl[0:backup]:
+            self._csr -= 1
+            if l == level:
+                self._dl.reverse()
+                return
+            if l < level:
+                self._dl.reverse()
+                self._csr = backup+1
+                return
+        self._dl.reverse()
+        self._csr = backup+1
+        return
+
     def _move_csr_down_by_lvl(self):
         if self._csr < len(self._dl):
             l, m, p, _, t = self._dl[self._csr]
@@ -195,14 +230,19 @@ class phnb:
             self._dl[self._csr] = ( _l, _m, _p, curses.A_REVERSE, _t)
 
     def find_next_brotha(self, level):
+        backup = self._csr
         for l, _, _, _, _ in self._dl[self._csr:]:
             self._csr += 1
             if l == level:
                 return 
-        self._csr = len(self._dl)-1
+            if l > level:
+                self._csr = backup-1
+                return 
+        self._csr = backup-1
         return 
 
     def _move_csr_down(self):
+        """ deprecated """
         if self._csr < len(self._dl):
             l, m, p, _, t = self._dl[self._csr]
             self._dl[self._csr] = ( l, m, p, curses.A_NORMAL, t ) 
@@ -263,5 +303,3 @@ class phnb:
                 hc.append((_l, _m, _t))
             _l, _m, _t = l, m, t
         self._parents_list = hc
-
-
