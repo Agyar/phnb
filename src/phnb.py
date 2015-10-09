@@ -63,12 +63,20 @@ class phnb:
         self._modified = True
 
     def collapse(self):
-        l, m, _, _, t = self._dl[self._csr]
+        l, _, _, _, _ = self._dl[self._csr]
+
+        # collapse operates at the father level
+        self.find_daddy(l)
+        l, m, p, x, t = self._dl[self._csr]
+
         i = self.db.index((l,m,t))
         meta = m.copy()
-        if meta.get('expanded'):
-            meta.pop('expanded')
+        meta['expanded'] = 'no'
         self.db._data[i] = (l, meta, t)
+        self.update_db()
+
+        self._csr = self._dl.index((l, meta, p, x, t))
+        self._dl[self._csr] = ( l, meta, p, curses.A_REVERSE, t)
         self._modified = True
 
     def copy_node(self):

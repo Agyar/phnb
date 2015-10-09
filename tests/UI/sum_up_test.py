@@ -13,20 +13,6 @@ key_handler = phnb_curses_keys_handler(phnb_ui)
 
 phnb = phnb(phnb_db, phnb_ui)
 
-#while (True):
-""" version 1 """
-    #key = phnb_curses._screen.getch()
-    #if key == ord('q'):
-        #break
-""" version 2 """
-    #if key_handler.get_key() == phnb_event.KEY_EXIT:
-        #break
-
-""" key displayer """
-#key = phnb_curses._screen.getch()
-#phnb_curses.end_ui()
-#print(key)
-
 y, x = 2, 2
 
 phnb.draw_phnb()
